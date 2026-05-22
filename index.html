@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="HandheldFriendly" content="true">
+    <title>Playsla — Android Auto на Tesla</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <video id="screen" autoplay muted playsinline disableremoteplayback></video>
+
+    <div id="overlay">
+        <div class="brand">
+            <span class="play">▶</span>
+            <span class="name">Playsla</span>
+        </div>
+        <div class="tag">Android Auto на экране Tesla</div>
+
+        <div class="rows">
+            <div class="row">
+                <span class="label">Сигналинг</span>
+                <span class="value" id="s-sig">…</span>
+            </div>
+            <div class="row">
+                <span class="label">Телефон</span>
+                <span class="value" id="s-peer">ожидание</span>
+            </div>
+            <div class="row">
+                <span class="label">Декодер</span>
+                <span class="value" id="s-decoder">—</span>
+            </div>
+            <div class="row">
+                <span class="label">Поток</span>
+                <span class="value" id="s-stream">—</span>
+            </div>
+        </div>
+
+        <div class="hint">
+            Включите hotspot на телефоне и запустите Playsla.<br>
+            Tesla должна быть подключена к точке доступа.
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
