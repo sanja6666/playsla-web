@@ -647,7 +647,7 @@ function pruneBuffer() {
     const now = video.currentTime;
     const start = buffered.start(0);
 
-    const keepBackTo = now - 1.0;
+    const keepBackTo = now - 0.3;
     if (start < keepBackTo) {
         try { sb.remove(start, keepBackTo); } catch (_) {}
     }
@@ -660,15 +660,23 @@ function maybeSnapToLive() {
     if (buffered.length === 0) return;
     const liveEdge = buffered.end(buffered.length - 1);
     const drift = liveEdge - video.currentTime;
-    if (drift > 0.5) {
+    state.lastDrift = drift;
+    if (drift > 0.25) {
         const now = performance.now();
-        if (now - state.lastResyncMs > 1000) {
+        if (now - state.lastResyncMs > 200) {
             state.lastResyncMs = now;
             try {
-                video.currentTime = Math.max(0, liveEdge - 0.05);
-                console.log(`[snap] drift=${drift.toFixed(3)}s → currentTime=${video.currentTime.toFixed(3)}`);
+                video.currentTime = Math.max(0, liveEdge - 0.02);
+                video.playbackRate = 1.0;
+                state.snapCount = (state.snapCount || 0) + 1;
             } catch (_) {}
         }
+    } else if (drift > 0.08) {
+        if (video.playbackRate < 1.28) {
+            try { video.playbackRate = 1.3; } catch (_) {}
+        }
+    } else if (drift < 0.04 && video.playbackRate !== 1.0) {
+        try { video.playbackRate = 1.0; } catch (_) {}
     }
 }
 
