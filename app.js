@@ -259,9 +259,12 @@ class Mp4Muxer {
         this.trackId = 1;
         this.initEmitted = false;
         this.codecString = 'avc1.42E01F';
+        this.firstFrameWallMs = 0;
+        this.lastFrameWallMs = 0;
+        this.currentSampleDuration = Math.round(this.timescale / this.fps);
     }
 
-    get sampleDuration() { return Math.round(this.timescale / this.fps); }
+    get sampleDuration() { return this.currentSampleDuration; }
 
     feed(annexB) {
         const nals = splitAnnexB(annexB);
@@ -299,9 +302,20 @@ class Mp4Muxer {
         let isKey = false;
         if (slices.length > 0 && this.initEmitted) {
             isKey = slices.some(n => (n[0] & 0x1f) === 5);
+            const nowMs = performance.now();
+            if (this.firstFrameWallMs === 0) {
+                this.firstFrameWallMs = nowMs;
+                this.lastFrameWallMs = nowMs;
+                this.currentSampleDuration = Math.round(this.timescale / this.fps);
+            } else {
+                const deltaMs = nowMs - this.lastFrameWallMs;
+                const clampedMs = Math.max(8, Math.min(200, deltaMs));
+                this.currentSampleDuration = Math.round(clampedMs * this.timescale / 1000);
+                this.lastFrameWallMs = nowMs;
+            }
             fragment = this.buildFragment(slices, isKey);
             this.sequenceNumber++;
-            this.baseDecodeTime += this.sampleDuration;
+            this.baseDecodeTime += this.currentSampleDuration;
         }
         return { init, fragment, isKey };
     }
